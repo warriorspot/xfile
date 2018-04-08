@@ -1,0 +1,5 @@
+LIBRARY  C:\xfile\src\tokenize
+VERSION  0.0000
+EXPORTS  %%%%blowback_tokenize
+EXPORTS  %_StartLibrary_tokenize
+EXPORTS  Tokenize

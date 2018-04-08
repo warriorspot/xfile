@@ -1,0 +1,148 @@
+3/10/2009
+- Added Delete to Edit menu of Design Mode
+- Added group delete (only applies to Labels/Static Images)
+- Added Select All to Edit Menu of Design Mode
+- Fixed delete record handling.  It now picks the right
+  next record to display after a record is deleted.
+- Added ability to change the order of the fields in the database.
+- Summary fields obey the Show Only Marked rule.  They will operate
+  only on marked records when Show Only Marked is true.
+- Only update fields that are in the current layout
+
+3/12/2009
+- Fixed Field Order code
+- Changed font application-wide
+- Changed some XuiList scrollbars
+- Added Field Size indicator to Ruler
+- Added labels to pixel mode of Ruler
+- Changed Ruler to green
+
+3/13/2009
+- Fixed problem with Reload Current layout
+- Always show field names in Design mode
+- More font changes
+- fix for smearing when in "Show Window Contents While Dragging" mode.
+- Added QuitProgram() to handle quitting properly 
+
+3/14/2009
+- Save button saves Layout in Design mode, Records in Data mode
+- Open and New buttons only operate in Design Mode
+- Switching modes keeps main window selected
+- You can resize fields!  Arrow keys on selected field
+
+3/15/2009
+- Added sanity checks to move and resize
+- You can move with the arrow keys. (Shift to move or resize by a greater increment)
+- You can resize with Ctrl-arrow keys
+- Size guide shows up in ruler for a selected field (or first selected field in the case of a group select)
+- FieldProperties window updates font viewer to show font of selected object.
+- Cannot create a pages size that wont fit on the screen
+ 
+3/17/2009
+- Only update fields in the current layout when displaying a record
+- Only redraw Canvas when needed in SetImage
+- Unmarking all records turns off Show Only Marked
+
+3/18/2009
+- Added Export dialog.  Allows export as CSV or BMP
+- Added ExpressionBuilder.  Allows some better marking options.  Allows
+  a query like [field] [,>,<,>=,<=] [value] [AND/OR] [field] [,>,<,>=,<=] [value]
+
+3/20/2009
+- Added support for inserting date and time
+- Fixed issue with tearoffs not being right size
+- Got rid of TearoffInit
+- Allowed CloseProject() to bail out if field validation fails.
+
+3/21/2009
+- Deleting a field now triggers summary field updates
+- Got rid of unused component in FIELD type definition (breaks all existing layouts)
+- Viewing summary field from Organizer now shows Data Attributes properly
+- Deleting a field now updates Summary field index references.
+- Re-ordering fields updates Summary field index references.
+- Fix minute value for Insert Time if minute is < 10 (adds the leading 0)
+
+3/23/2009
+- Fixed CSV export/import so XFile can at least import its own exported files. (see README)
+- Added Insert | Week Of Year.  Now you dont have to waste both of your expression in ExpressionBuilder
+  to calculated dates falling within the current week.  You can have an integer field that holds 
+  week of year instead.
+
+3/24/2009
+- XFile window title now properly displays current project name
+- Fixed small issue with Select All
+- Fixed small issue with Fonts during layout load
+- Fixed issue with operator lists being horizontally scrollable in ExpressionBuilder
+
+3/25/2009
+- Fixed issue in Create dialog
+- Made Length field manually editable
+- Added preliminary support (via PVW32Conv.exe) for JPG, PNG, GIF, TIF, PCX images
+
+3/27/2009
+- Fixed boundary check for mouse move of objects
+- Got rid of unused function
+- Cleaned up Select mode mouse handling
+- Mouse wheel can now be used to navigate records in Data mode
+- Mouse wheel now acts like Tab key in Design mode
+
+3/28/2009
+- Allow blank date
+
+3/29/2009
+- Change radio button style on FieldProperties dialog
+- Added xfile.cfg.  Sets a few global configuration parameters.  Editable/re-readable from within XFile (Properties menu)
+
+3/30/2009
+- Added project title to Console window
+- Added parameters to xfile.cfg for Debug and ShowConsole
+- Added Show Console and Hide Console to both View menus
+- Intelligent tab key handling in Data Entry mode (still goofy in Design Mode)
+
+3/31/2009
+- Intelligent tab key handling extended to Design Mode.  Ugly, ugly code.
+- Removed Bitmap Editor from .geo file.  It is now read only from xfile.cfg.
+- Fixed handling of image names with spaces in them
+- Fixed handling of file extension
+- Fixed issue where ruler guides would not redraw if mouse was not
+  in Canvas grid
+
+4/4/2009
+- Added '-' to disallowed characters in field names
+
+6/10/2009
+- Added 'Quit' menu option to File menu in Data mode
+- Unmarking records in "Show Only Marked" mode selects next marked record
+
+8/20/2009
+- Added View->Field As List in Data Entry mode
+  Allows viewing of all values in the database for the specified
+  field in list form.  Double clicking a list entry displays the
+  associated record.
+
+8/21/2009
+- Fixed Field As List to behave properly with sorting
+
+9/5/2009
+- Fixed crash if you type a field name in View Field As List that does not exist.
+- Added simple table based HTML export. Man, that export code is a mess.
+- Added View Database As HTML, which runs the HTML export to a temp file, then
+  loads the file in the HTMLViewer program defined in the config file.  So, you
+  will want to add a line HTMLViewer = "whatever program" to your xfile.cfg file.
+  A neat thing is that Excel, and probably any other modern spreadsheet will import
+  the HTML nicely into a spreadsheet.
+- If you are in design mode, and chose Run Bitmap Editor, if you have a static image 
+  selected, that static image will be passed as the first argument to your bitmap editor.
+  If you modify the image, you can select Layout | Reload Current to see the changes.
+  
+** PENDING KNOWN ISSUES (incomplete list)
+2. The multiline text field doesnt resize automatically when the font is changed
+4. On occassion, the ruler draws beyond its bounds.
+6. Field validation is done, but ignored, during field re-ordering.
+8. The whole number validation thing is half-baked and needs to be redone
+9. Default font when creating field is different than default when reading back in from layout.
+   This might be XBasics fault.
+10. When re-loading fields after re-ordering the database, sometimes the program claims there
+    is an error in the .geo file, but it loads fine if you open it manually
+11. If an image is set that exceeds the current page size, you cant move the image.  You
+    have to resize the page to accomodate the image, or set a different image
