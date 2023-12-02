@@ -3,3 +3,5 @@ VERSION 3
 EXPORTS sqlite3_open
 EXPORTS sqlite3_close
 EXPORTS sqlite3_exec
+
+

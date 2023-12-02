@@ -107,7 +107,6 @@ DECLARE FUNCTION  IsLabelSelected (grid, @index)
 DECLARE FUNCTION  DrawSelectionRectangle (SEL_LIST list[])
 DECLARE FUNCTION  UpdateCurrentRecord (grid)
 DECLARE FUNCTION  SaveData ()
-DECLARE FUNCTION  GetRecordSize ()
 DECLARE FUNCTION  ClearFields ()
 DECLARE FUNCTION  GetIndexByRecordNumber (record, @first, @last)
 DECLARE FUNCTION  DisplayRecord (record, update)
@@ -913,7 +912,7 @@ FUNCTION  CreateWindows ()
    GeoFile        (@GeoFile, #CreateWindow, 0, 0, 0, 0, 0, 0)
    XuiSendMessage ( GeoFile, #SetCallback, GeoFile, &GeoFileCode(), -1, -1, -1, 0)
    XuiSendMessage ( GeoFile, #Initialize, 0, 0, 0, 0, 0, 0)
-   XuiSendMessage ( GeoFile, #DisplayWindow, 0, 0, 0, 0, 0, 0)
+   'XuiSendMessage ( GeoFile, #DisplayWindow, 0, 0, 0, 0, 0, 0)
    XuiSendMessage ( GeoFile, #SetGridProperties, -1, 0, 0, 0, 0, 0)
    #GeoFile = GeoFile
 
@@ -1024,7 +1023,7 @@ FUNCTION  CreateWindows ()
 	XuiSendMessage ( Configuration, #Initialize, 0, 0, 0, 0, 0, 0)
 	XuiSendMessage ( Configuration, #SetGridProperties, -1, 0, 0, 0, 0, 0)
 	#Configuration = Configuration
-  
+
   ListView       (@ListView, #CreateWindow, 0, 0, 0, 0, 0, 0)
 	XuiSendMessage ( ListView, #SetCallback, ListView, &ListViewCode(), -1, -1, -1, 0)
 	XuiSendMessage ( ListView, #Initialize, 0, 0, 0, 0, 0, 0)
@@ -2384,10 +2383,6 @@ FUNCTION  GeoFile (grid, message, v0, v1, v2, v3, r0, (r1, r1$, r1[], r1$[]))
   END SUB
 
   SUB Resize
-    XgrGetGridWindow(grid, @window)
-    XgrGetWindowPositionAndSize(window, @wx, @wy, @ww, @wh)
-    XgrSetWindowPositionAndSize(window, @wx, @wy, #WindowWidth, #WindowHeight)
-    XuiSendMessage(window, #ResizeWindowToGrid,0,0,0,0,0,0)
   END SUB
 
   SUB Selection
@@ -2399,7 +2394,7 @@ FUNCTION  GeoFile (grid, message, v0, v1, v2, v3, r0, (r1, r1$, r1[], r1$[]))
   '
      func[#Callback]           = &XuiCallback ()               ' disable to handle Callback messages internally
   ' func[#GetSmallestSize]    = 0                             ' enable to add internal GetSmallestSize routine
-  '  func[#Resize]             = 0                             ' enable to add internal Resize routine
+     func[#Resize]             = 0                            ' enable to add internal Resize routine
   '
      DIM sub[upperMessage]
   '  sub[#Callback]            = SUBADDRESS (Callback)         ' enable to handle Callback messages internally
@@ -2407,7 +2402,7 @@ FUNCTION  GeoFile (grid, message, v0, v1, v2, v3, r0, (r1, r1$, r1[], r1$[]))
      sub[#CreateWindow]        = SUBADDRESS (CreateWindow)     ' must be subroutine in this function
      'sub[#GetSmallestSize]     = SUBADDRESS (GetSmallestSize)  ' enable to add internal GetSmallestSize routine
      sub[#Redrawn]             = SUBADDRESS (Redrawn)          ' generate #Redrawn callback if appropriate
-     sub[#Resize]              = SUBADDRESS (Resize)           ' enable to add internal Resize routine
+  '   sub[#Resize]              = SUBADDRESS (Resize)           ' enable to add internal Resize routine
      sub[#Selection]           = SUBADDRESS (Selection)        ' routes Selection callbacks to subroutine
   '
      IF sub[0] THEN PRINT "GeoFile() : Initialize : error ::: (undefined message)"
@@ -3527,7 +3522,7 @@ FUNCTION  RecordCode (grid, message, v0, v1, v2, v3, kid, r1)
         CASE $xpbHelp         :Help()
      END SELECT
   END SUB
-  
+
   SUB xcbMarkRecord_Clicked
     MarkRecord(#CurrentRecord, v0)
     IF(#ShowOnlyMarked) THEN
@@ -4036,7 +4031,7 @@ FUNCTION  GeoFileCEO (grid, message, v0, v1, v2, v3, r0, r1)
             IF(ObjectList[y].grid_type == $$LABEL || ObjectList[y].grid_type == $$STATIC_IMAGE) THEN
 							GetLabelByGrid(ObjectList[y].grid, @y)
             END IF
-            SelList[0].index = y  
+            SelList[0].index = y
 						FieldPropertiesCode(#FieldProperties, #Notify,0,0,0,0,0,0)
 						XuiSendMessage(#CanvasGrid, #Redraw, 0,0,0,0,0,0)
 						DrawSelectionRectangle(@SelList[])
@@ -4464,25 +4459,6 @@ FUNCTION  SaveData ()
       REDIM #Buff[]
     END IF
   END IF
-END FUNCTION
-
-'
-'
-' ##############################
-' #####  GetRecordSize ()  #####
-' ##############################
-'
-FUNCTION  GetRecordSize ()
-   SHARED FIELD RecordList[]
-   XLONG size
-
-   size = 0
-
-   FOR i = 0 TO UBOUND(RecordList[])
-      size = size + RecordList[i].size
-   NEXT i
-
-   RETURN size
 
 END FUNCTION
 '
@@ -4842,7 +4818,7 @@ FUNCTION  GetFieldByName (name$, index)
    NEXT i
 
    index = -1
-  
+
    RETURN $$FALSE
 
 END FUNCTION
@@ -5476,17 +5452,17 @@ FUNCTION  ExportCode (grid, message, v0, v1, v2, v3, kid, r1)
     #PrintActive = $$FALSE
     GOSUB CloseWindow
   END SUB
-  
+
   SUB ExportBMP
-    #PrintActive = $$TRUE 
+    #PrintActive = $$TRUE
     ExportRecords("", $$EXPORT_BMP, type)
   END SUB
-  
+
   SUB ExportCSV
     GetFilename(@file$, @attr)
     IF(file$) THEN ExportRecords(@file$, $$EXPORT_CSV, type)
   END SUB
-  
+
   SUB ExportHTML
     GetFilename(@file$, @attr)
     IF(file$) THEN ExportRecords(@file$, $$EXPORT_HTML, type)
@@ -7033,7 +7009,7 @@ FUNCTION  ExportRecords (@file$, type, mode)
     NEXT i
     GOSUB FinishExport
   END SUB
-  
+
   SUB ExportHTML
     count = ExportHTML(@file$, mode)
     GOSUB FinishExport
@@ -9669,6 +9645,7 @@ FUNCTION  XFileCode (grid, message, v0, v1, v2, v3, kid, r1)
     IF(CreateProject()) THEN
       XuiSendMessage(grid, #HideWindow,0,0,0,0,0,0)
       #SplashActive = $$FALSE
+			XuiSendMessage (#GeoFile, #DisplayWindow, 0, 0, 0, 0, 0, 0)
     END IF
   END SUB
 
@@ -9677,6 +9654,7 @@ FUNCTION  XFileCode (grid, message, v0, v1, v2, v3, kid, r1)
       IF(OpenProject(@file$)) THEN
         XuiSendMessage(grid, #HideWindow, 0,0,0,0,0,0)
         #SplashActive = $$FALSE
+				XuiSendMessage (#GeoFile, #DisplayWindow, 0, 0, 0, 0, 0, 0)
       END IF
     END IF
   END SUB
@@ -9989,6 +9967,260 @@ FUNCTION  LayoutCode (grid, message, v0, v1, v2, v3, kid, r1)
     DisplayRecord(#CurrentRecord, $$TRUE)
   END SUB
 
+END FUNCTION
+
+'
+'
+'	#########################
+'	#####  ListView ()  #####
+'	#########################
+'
+'	"Anatomy of Grid Functions" in the GuiDesigner Programmer Guide
+'	describes the operation and modification of grid functions in detail.
+'
+'	WindowFromFunction and/or WindowToFunction may not work, or may not generate the desired results if you:
+'		* Modify the kid constant definition improperly.
+'		* Modify the code in the Create subroutine improperly.
+'		* Imbed blank or comment lines in the Create subroutine.
+'		* Remove the GOSUB Resize line in the Create subroutine (comment out is okay).
+'		* Imbed special purpose code in the Create subroutine before the GOSUB Resize line.
+'		* Delete any of the four lines that assign values to designX, designY, designWidth, designHeight.
+'
+FUNCTION  ListView (grid, message, v0, v1, v2, v3, r0, (r1, r1$, r1[], r1$[]))
+	STATIC  designX,  designY,  designWidth,  designHeight
+	STATIC  SUBADDR  sub[]
+	STATIC  upperMessage
+	STATIC  ListView
+'
+	$ListView  =   0  ' kid   0 grid type = ListView
+  $Fieldlist =   1
+	$Listview  =   2 ' kid   1 grid type = XuiList
+	$UpperKid  =   2  ' kid maximum
+'
+'
+	IFZ sub[] THEN GOSUB Initialize
+'	XuiReportMessage (grid, message, v0, v1, v2, v3, r0, r1)
+	IF XuiProcessMessage (grid, message, @v0, @v1, @v2, @v3, @r0, @r1, ListView) THEN RETURN
+	IF (message <= upperMessage) THEN GOSUB @sub[message]
+	RETURN
+  '
+  '
+  ' *****  Callback  *****  message = Callback : r1 = original message
+  '
+  SUB Callback
+    message = r1
+    callback = message
+    IF (message <= upperMessage) THEN GOSUB @sub[message]
+  END SUB
+  '
+  '
+  ' *****  Create  *****  v0123 = xywh : r0 = window : r1 = parent
+  '
+  SUB Create
+    IF (v0 <= 0) THEN v0 = 0
+    IF (v1 <= 0) THEN v1 = 0
+    IF (v2 <= 0) THEN v2 = designWidth
+    IF (v3 <= 0) THEN v3 = designHeight
+    XuiCreateGrid  (@grid, ListView, @v0, @v1, @v2, @v3, r0, r1, &ListView())
+    XuiSendMessage ( grid, #SetGridName, 0, 0, 0, 0, 0, @"ListView")
+    XuiDropBox     (@g, #Create, 0, 0, 300, 24, r0, grid)
+    XuiSendMessage ( g, #SetCallback, grid, &ListView(), -1, -1, $Fieldlist, grid)
+    XuiSendMessage ( g, #SetFont, 240, 1000, 0, 0, 0, @"MS Sans Serif")
+    XuiSendMessage ( g, #SetGridName, 0, 0, 0, 0, 0, @"Fieldlist")
+    XuiSendMessage ( g, #SetStyle, 0, 0, 0, 0, 0, 0)
+    XuiSendMessage ( g, #SetGridName, 0, 0, 0, 0, 1, @"TextLine")
+    XuiSendMessage ( g, #SetFont, 240, 1000, 0, 0, 1, @"MS Sans Serif")
+    XuiSendMessage ( g, #SetBorder, $$BorderRidge, $$BorderRidge, $$BorderRidge, 0, 1, 0)
+    XuiSendMessage ( g, #SetGridName, 0, 0, 0, 0, 2, @"PressButton")
+    XuiSendMessage ( g, #SetGridName, 0, 0, 0, 0, 3, @"Fieldlist")
+    XuiSendMessage ( g, #SetFont, 240, 1000, 0, 0, 3, @"MS Sans Serif")
+    XuiList        (@g, #Create, 0, 24, 300, 300, r0, grid)
+    XuiSendMessage ( g, #SetCallback, grid, &ListView(), -1, -1, $Listview, grid)
+    XuiSendMessage ( g, #SetGridName, 0, 0, 0, 0, 0, @"Listview")
+    XuiSendMessage ( g, #SetStyle, 0, 0, 0, 0, 0, 0)
+    XuiSendMessage ( g, #SetBorder, $$BorderLoLine1, $$BorderLoLine1, $$BorderNone, 0, 0, 0)
+    XuiSendMessage ( g, #SetGridName, 0, 0, 0, 0, 1, @"List")
+    XuiSendMessage ( g, #SetColor, $$White, $$Black, $$Black, $$White, 1, 0)
+    XuiSendMessage ( g, #SetColorExtra, $$Grey, $$Green, $$Black, $$White, 1, 0)
+    XuiSendMessage ( g, #SetGridName, 0, 0, 0, 0, 2, @"ScrollH")
+    XuiSendMessage ( g, #SetStyle, 2, 0, 0, 0, 2, 0)
+    XuiSendMessage ( g, #SetGridName, 0, 0, 0, 0, 3, @"ScrollV")
+    XuiSendMessage ( g, #SetStyle, 2, 0, 0, 0, 3, 0)
+    GOSUB Resize
+  END SUB
+  '
+  '
+  ' *****  CreateWindow  *****  v0123 = xywh : r0 = windowType : r1$ = display$
+  '
+  SUB CreateWindow
+    IF (v0 == 0) THEN v0 = designX
+    IF (v1 == 0) THEN v1 = designY
+    IF (v2 <= 0) THEN v2 = designWidth
+    IF (v3 <= 0) THEN v3 = designHeight
+    XuiWindow (@window, #WindowCreate, v0, v1, v2, v3, r0, @r1$)
+    v0 = 0 : v1 = 0 : r0 = window : ATTACH r1$ TO display$
+    GOSUB Create
+    r1 = 0 : ATTACH display$ TO r1$
+    XuiWindow (window, #WindowRegister, grid, -1, v2, v3, @r0, @"ListView")
+  END SUB
+  '
+  '
+  ' *****  GetSmallestSize  *****  see "Anatomy of Grid Functions"
+  '
+  SUB GetSmallestSize
+  END SUB
+  '
+  '
+  ' *****  Redrawn  *****  see "Anatomy of Grid Functions"
+  '
+  SUB Redrawn
+    XuiCallback (grid, #Redrawn, v0, v1, v2, v3, r0, r1)
+  END SUB
+  '
+  '
+  ' *****  Resize  *****  see "Anatomy of Grid Functions"
+  '
+  SUB Resize
+  END SUB
+  '
+  '
+  ' *****  Selection  *****  see "Anatomy of Grid Functions"
+  '
+  SUB Selection
+  END SUB
+  '
+  '
+  ' *****  Initialize  *****  see "Anatomy of Grid Functions"
+  '
+  SUB Initialize
+    XuiGetDefaultMessageFuncArray (@func[])
+    XgrMessageNameToNumber (@"LastMessage", @upperMessage)
+  '
+    func[#Callback]           = &XuiCallback ()               ' disable to handle Callback messages internally
+  ' func[#GetSmallestSize]    = 0                             ' enable to add internal GetSmallestSize routine
+  ' func[#Resize]             = 0                             ' enable to add internal Resize routine
+  '
+    DIM sub[upperMessage]
+  '	sub[#Callback]            = SUBADDRESS (Callback)         ' enable to handle Callback messages internally
+    sub[#Create]              = SUBADDRESS (Create)           ' must be subroutine in this function
+    sub[#CreateWindow]        = SUBADDRESS (CreateWindow)     ' must be subroutine in this function
+  '	sub[#GetSmallestSize]     = SUBADDRESS (GetSmallestSize)  ' enable to add internal GetSmallestSize routine
+    sub[#Redrawn]             = SUBADDRESS (Redrawn)          ' generate #Redrawn callback if appropriate
+  '	sub[#Resize]              = SUBADDRESS (Resize)           ' enable to add internal Resize routine
+    sub[#Selection]           = SUBADDRESS (Selection)        ' routes Selection callbacks to subroutine
+  '
+    IF sub[0] THEN PRINT "ListView() : Initialize : error ::: (undefined message)"
+    IF func[0] THEN PRINT "ListView() : Initialize : error ::: (undefined message)"
+    XuiRegisterGridType (@ListView, "ListView", &ListView(), @func[], @sub[])
+  '
+  ' Don't remove the following 4 lines, or WindowFromFunction/WindowToFunction will not work
+  '
+    designX = 526
+    designY = 152
+    designWidth = 300
+    designHeight = 324
+  '
+    gridType = ListView
+    XuiSetGridTypeProperty (gridType, @"x",                designX)
+    XuiSetGridTypeProperty (gridType, @"y",                designY)
+    XuiSetGridTypeProperty (gridType, @"width",            designWidth)
+    XuiSetGridTypeProperty (gridType, @"height",           designHeight)
+    XuiSetGridTypeProperty (gridType, @"maxWidth",         designWidth)
+    XuiSetGridTypeProperty (gridType, @"maxHeight",        designHeight)
+    XuiSetGridTypeProperty (gridType, @"minWidth",         designWidth)
+    XuiSetGridTypeProperty (gridType, @"minHeight",        designHeight)
+    XuiSetGridTypeProperty (gridType, @"can",              $$Focus OR $$Respond OR $$Callback)
+    XuiSetGridTypeProperty (gridType, @"focusKid",         $Listview)
+    IFZ message THEN RETURN
+  END SUB
+END FUNCTION
+
+'
+'
+' #############################
+' #####  ListViewCode ()  #####
+' #############################
+'
+
+FUNCTION  ListViewCode (grid, message, v0, v1, v2, v3, kid, r1)
+  SHARED RECORD RecordList[]
+  SHARED StringData$[]
+  STATIC XLONG Record[]
+
+	$ListView  =   0  ' kid   0 grid type = ListView
+  $Fieldlist =   1
+	$Listview  =   2 ' kid   1 grid type = XuiList
+	$UpperKid  =   2  ' kid maximum
+'
+	'XuiReportMessage (grid, message, v0, v1, v2, v3, kid, r1)
+	IF (message == #Callback) THEN message = r1
+'
+	SELECT CASE message
+    CASE #Notify      : GOSUB Update
+		CASE #Selection		: GOSUB Selection   	' most common callback message
+		CASE #CloseWindow	: XuiSendMessage (grid, #HideWindow, 0, 0, 0, 0, 0, 0)
+	END SELECT
+	RETURN
+  '
+  '
+  ' *****  Selection  *****
+  '
+  SUB Selection
+    SELECT CASE kid
+      CASE $ListView  :
+      CASE $Fieldlist : GOSUB HandleField
+      CASE $Listview  : GOSUB HandleListSelection
+    END SELECT
+  END SUB
+
+  SUB HandleField
+    IFZ(RecordList[]) THEN EXIT SUB
+    ctr = 0
+    XuiSendMessage(#ListView, #GetTextString, 0, 0,0,0, $Fieldlist, @field$)
+    IFZ(GetFieldByName(field$, @index)) THEN RETURN
+    'Get all field values for the requested field
+    REDIM #Buff$[]
+    REDIM #Buff$[UBOUND(RecordList[])]
+    REDIM Record[UBOUND(RecordList[])]
+    IF(#ShowOnlyMarked) THEN
+      record = GetFirstRecord(0, $$GET_MARKED)
+    ELSE
+      record = GetFirstRecord(0, $$GET_ORDINAL)
+    END IF
+    first = RecordList[record].first
+    #Buff$[ctr] = StringData$[first + index]
+    Record[ctr] = record
+    DO
+      INC ctr
+      IF(#ShowOnlyMarked) THEN
+        record = GetNextRecord(GetOrderIndex(record), $$GET_MARKED)
+      ELSE
+        record = GetNextRecord(GetOrderIndex(record), $$GET_ORDINAL)
+      END IF
+      IF(record == -1) THEN EXIT DO
+      first = RecordList[record].first
+      #Buff$[ctr] = StringData$[first + index]
+      Record[ctr] = record
+    LOOP
+
+    XuiSendMessage(#ListView, #SetTextArray, 0,0,0,0, $Listview, @#Buff$[])
+    XuiSendMessage(#ListView, #SetWindowTitle, 0,0,0,0,0, @field$)
+    XuiSendMessage(#ListView, #Redraw, 0,0,0,0,$Listview, 0)
+  END SUB
+
+  SUB HandleListSelection
+    record = Record[v0]
+    DisplayRecord(record, $$TRUE)
+  END SUB
+
+  SUB Update
+    IF(v0) THEN
+      GetFieldNames(@#Buff$[])
+      XuiSendMessage(#ListView, #SetTextArray, 0,0,0,0, $Fieldlist, @#Buff$[])
+      XuiSendMessage(#ListView, #Redraw, 0,0,0,0,$Fieldlist, 0)
+    END IF
+    GOSUB HandleField
+  END SUB
 END FUNCTION
 
 ' #################################
@@ -11130,19 +11362,6 @@ FUNCTION  ModifyPageCode (grid, message, v0, v1, v2, v3, kid, r1)
     XuiSendMessage(grid, #RedrawText, 0,0,0,0, $xtlPixelH,0)
   END SUB
 
-END FUNCTION
-
-FUNCTION UpdateShowMarked(record)
-  SHARED MODE Mode
-  
-  IF(record != -1) THEN
-    Mode.viewMode = $$VIEW_MARKED
-    DisplayRecord(record, $$TRUE)
-  ELSE
-    ShowMessage("No Marked Records!")
-    Mode.viewMode = $$VIEW_ALL
-    #ShowOnlyMarked = $$FALSE
-  END IF
 END FUNCTION
 
 FUNCTION  UpdateSummaryField (index)
@@ -13115,7 +13334,7 @@ FUNCTION ConvertImage(@file$, @converted)
   converted = $$FALSE
 
   GOSUB CheckFileExtension
-  
+
   cmd$ = $$IMG_CONVERTER$ + " \"" + file$ + "\" " + "-w --24 --o "
   file$ = LEFT$(file$, pos)
   file$ = "\"" + file$ + "bmp\""
@@ -13148,19 +13367,19 @@ FUNCTION ConvertImage(@file$, @converted)
 	  pos = 1
 	  DO
       err = INSTR(file$, ".", pos)
-			IF(err > 0) THEN 
-			  pos = err + 1	
+			IF(err > 0) THEN
+			  pos = err + 1
 		  ELSE
 				EXIT DO
 			END IF
 	  LOOP
-    IF(pos == 0) THEN 
+    IF(pos == 0) THEN
 		  ShowMessage("Unsupported image format!")
       RETURN $$FALSE
 	  END IF
-		
+
 		pos = pos - 1
-		
+
     ext$ = RIGHT$(file$, LEN(file$) - pos)
     Log($$LOG_DEBUG, "File extension: " + ext$)
     ext$ = UCASE$(ext$)
@@ -13196,14 +13415,14 @@ FUNCTION InsertDate()
   END IF
 END FUNCTION
 
-'Get the next field relative to the current 
+'Get the next field relative to the current
 'selected object in either the up or down direction
 'This is a cluster-fuck of a function and shows
 'that I made a big design mistake in keeping two
 'separate lists FieldList and LabelList.  Should
 'have always just had everything in one list.
 '
-'Returns the index into ObjectList[] of the 
+'Returns the index into ObjectList[] of the
 'next object!
 FUNCTION GetNextField(in, @out, dir, labels)
   SHARED FIELD FieldList[]
@@ -13578,7 +13797,7 @@ FUNCTION  Configuration (grid, message, v0, v1, v2, v3, r0, (r1, r1$, r1[], r1$[
   '
     func[#Callback]           = &XuiCallback ()               ' disable to handle Callback messages internally
   ' func[#GetSmallestSize]    = 0                             ' enable to add internal GetSmallestSize routine
-  ' func[#Resize]             = 0                             ' enable to add internal Resize routine
+    func[#Resize]             = &XuiResizeWindowToGrid()                  ' enable to add internal Resize routine
   '
     DIM sub[upperMessage]
   '	sub[#Callback]            = SUBADDRESS (Callback)         ' enable to handle Callback messages internally
@@ -13688,258 +13907,17 @@ FUNCTION CombineFieldLists(FIELD a[], FIELD b[], FIELD list[])
   NEXT i
 END FUNCTION
 
-'
-'
-'	#########################
-'	#####  ListView ()  #####
-'	#########################
-'
-'	"Anatomy of Grid Functions" in the GuiDesigner Programmer Guide
-'	describes the operation and modification of grid functions in detail.
-'
-'	WindowFromFunction and/or WindowToFunction may not work, or may not generate the desired results if you:
-'		* Modify the kid constant definition improperly.
-'		* Modify the code in the Create subroutine improperly.
-'		* Imbed blank or comment lines in the Create subroutine.
-'		* Remove the GOSUB Resize line in the Create subroutine (comment out is okay).
-'		* Imbed special purpose code in the Create subroutine before the GOSUB Resize line.
-'		* Delete any of the four lines that assign values to designX, designY, designWidth, designHeight.
-'
-FUNCTION  ListView (grid, message, v0, v1, v2, v3, r0, (r1, r1$, r1[], r1$[]))
-	STATIC  designX,  designY,  designWidth,  designHeight
-	STATIC  SUBADDR  sub[]
-	STATIC  upperMessage
-	STATIC  ListView
-'
-	$ListView  =   0  ' kid   0 grid type = ListView
-  $Fieldlist =   1
-	$Listview  =   2 ' kid   1 grid type = XuiList
-	$UpperKid  =   2  ' kid maximum
-'
-'
-	IFZ sub[] THEN GOSUB Initialize
-'	XuiReportMessage (grid, message, v0, v1, v2, v3, r0, r1)
-	IF XuiProcessMessage (grid, message, @v0, @v1, @v2, @v3, @r0, @r1, ListView) THEN RETURN
-	IF (message <= upperMessage) THEN GOSUB @sub[message]
-	RETURN
-  '
-  '
-  ' *****  Callback  *****  message = Callback : r1 = original message
-  '
-  SUB Callback
-    message = r1
-    callback = message
-    IF (message <= upperMessage) THEN GOSUB @sub[message]
-  END SUB
-  '
-  '
-  ' *****  Create  *****  v0123 = xywh : r0 = window : r1 = parent
-  '
-  SUB Create
-    IF (v0 <= 0) THEN v0 = 0
-    IF (v1 <= 0) THEN v1 = 0
-    IF (v2 <= 0) THEN v2 = designWidth
-    IF (v3 <= 0) THEN v3 = designHeight
-    XuiCreateGrid  (@grid, ListView, @v0, @v1, @v2, @v3, r0, r1, &ListView())
-    XuiSendMessage ( grid, #SetGridName, 0, 0, 0, 0, 0, @"ListView")
-    XuiDropBox     (@g, #Create, 0, 0, 300, 24, r0, grid)
-    XuiSendMessage ( g, #SetCallback, grid, &ListView(), -1, -1, $Fieldlist, grid)
-    XuiSendMessage ( g, #SetFont, 240, 1000, 0, 0, 0, @"MS Sans Serif")
-    XuiSendMessage ( g, #SetGridName, 0, 0, 0, 0, 0, @"Fieldlist")
-    XuiSendMessage ( g, #SetStyle, 0, 0, 0, 0, 0, 0)
-    XuiSendMessage ( g, #SetGridName, 0, 0, 0, 0, 1, @"TextLine")
-    XuiSendMessage ( g, #SetFont, 240, 1000, 0, 0, 1, @"MS Sans Serif")
-    XuiSendMessage ( g, #SetBorder, $$BorderRidge, $$BorderRidge, $$BorderRidge, 0, 1, 0)
-    XuiSendMessage ( g, #SetGridName, 0, 0, 0, 0, 2, @"PressButton")
-    XuiSendMessage ( g, #SetGridName, 0, 0, 0, 0, 3, @"Fieldlist")
-    XuiSendMessage ( g, #SetFont, 240, 1000, 0, 0, 3, @"MS Sans Serif")
-    XuiList        (@g, #Create, 0, 24, 300, 300, r0, grid)
-    XuiSendMessage ( g, #SetCallback, grid, &ListView(), -1, -1, $Listview, grid)
-    XuiSendMessage ( g, #SetGridName, 0, 0, 0, 0, 0, @"Listview")
-    XuiSendMessage ( g, #SetStyle, 0, 0, 0, 0, 0, 0)
-    XuiSendMessage ( g, #SetBorder, $$BorderLoLine1, $$BorderLoLine1, $$BorderNone, 0, 0, 0)
-    XuiSendMessage ( g, #SetGridName, 0, 0, 0, 0, 1, @"List")
-    XuiSendMessage ( g, #SetColor, $$White, $$Black, $$Black, $$White, 1, 0)
-    XuiSendMessage ( g, #SetColorExtra, $$Grey, $$Green, $$Black, $$White, 1, 0)
-    XuiSendMessage ( g, #SetGridName, 0, 0, 0, 0, 2, @"ScrollH")
-    XuiSendMessage ( g, #SetStyle, 2, 0, 0, 0, 2, 0)
-    XuiSendMessage ( g, #SetGridName, 0, 0, 0, 0, 3, @"ScrollV")
-    XuiSendMessage ( g, #SetStyle, 2, 0, 0, 0, 3, 0)
-    GOSUB Resize
-  END SUB
-  '
-  '
-  ' *****  CreateWindow  *****  v0123 = xywh : r0 = windowType : r1$ = display$
-  '
-  SUB CreateWindow
-    IF (v0 == 0) THEN v0 = designX
-    IF (v1 == 0) THEN v1 = designY
-    IF (v2 <= 0) THEN v2 = designWidth
-    IF (v3 <= 0) THEN v3 = designHeight
-    XuiWindow (@window, #WindowCreate, v0, v1, v2, v3, r0, @r1$)
-    v0 = 0 : v1 = 0 : r0 = window : ATTACH r1$ TO display$
-    GOSUB Create
-    r1 = 0 : ATTACH display$ TO r1$
-    XuiWindow (window, #WindowRegister, grid, -1, v2, v3, @r0, @"ListView")
-  END SUB
-  '
-  '
-  ' *****  GetSmallestSize  *****  see "Anatomy of Grid Functions"
-  '
-  SUB GetSmallestSize
-  END SUB
-  '
-  '
-  ' *****  Redrawn  *****  see "Anatomy of Grid Functions"
-  '
-  SUB Redrawn
-    XuiCallback (grid, #Redrawn, v0, v1, v2, v3, r0, r1)
-  END SUB
-  '
-  '
-  ' *****  Resize  *****  see "Anatomy of Grid Functions"
-  '
-  SUB Resize
-  END SUB
-  '
-  '
-  ' *****  Selection  *****  see "Anatomy of Grid Functions"
-  '
-  SUB Selection
-  END SUB
-  '
-  '
-  ' *****  Initialize  *****  see "Anatomy of Grid Functions"
-  '
-  SUB Initialize
-    XuiGetDefaultMessageFuncArray (@func[])
-    XgrMessageNameToNumber (@"LastMessage", @upperMessage)
-  '
-    func[#Callback]           = &XuiCallback ()               ' disable to handle Callback messages internally
-  ' func[#GetSmallestSize]    = 0                             ' enable to add internal GetSmallestSize routine
-  ' func[#Resize]             = 0                             ' enable to add internal Resize routine
-  '
-    DIM sub[upperMessage]
-  '	sub[#Callback]            = SUBADDRESS (Callback)         ' enable to handle Callback messages internally
-    sub[#Create]              = SUBADDRESS (Create)           ' must be subroutine in this function
-    sub[#CreateWindow]        = SUBADDRESS (CreateWindow)     ' must be subroutine in this function
-  '	sub[#GetSmallestSize]     = SUBADDRESS (GetSmallestSize)  ' enable to add internal GetSmallestSize routine
-    sub[#Redrawn]             = SUBADDRESS (Redrawn)          ' generate #Redrawn callback if appropriate
-  '	sub[#Resize]              = SUBADDRESS (Resize)           ' enable to add internal Resize routine
-    sub[#Selection]           = SUBADDRESS (Selection)        ' routes Selection callbacks to subroutine
-  '
-    IF sub[0] THEN PRINT "ListView() : Initialize : error ::: (undefined message)"
-    IF func[0] THEN PRINT "ListView() : Initialize : error ::: (undefined message)"
-    XuiRegisterGridType (@ListView, "ListView", &ListView(), @func[], @sub[])
-  '
-  ' Don't remove the following 4 lines, or WindowFromFunction/WindowToFunction will not work
-  '
-    designX = 526
-    designY = 152
-    designWidth = 300
-    designHeight = 324
-  '
-    gridType = ListView
-    XuiSetGridTypeProperty (gridType, @"x",                designX)
-    XuiSetGridTypeProperty (gridType, @"y",                designY)
-    XuiSetGridTypeProperty (gridType, @"width",            designWidth)
-    XuiSetGridTypeProperty (gridType, @"height",           designHeight)
-    XuiSetGridTypeProperty (gridType, @"maxWidth",         designWidth)
-    XuiSetGridTypeProperty (gridType, @"maxHeight",        designHeight)
-    XuiSetGridTypeProperty (gridType, @"minWidth",         designWidth)
-    XuiSetGridTypeProperty (gridType, @"minHeight",        designHeight)
-    XuiSetGridTypeProperty (gridType, @"can",              $$Focus OR $$Respond OR $$Callback)
-    XuiSetGridTypeProperty (gridType, @"focusKid",         $Listview)
-    IFZ message THEN RETURN
-  END SUB
-END FUNCTION
+FUNCTION UpdateShowMarked(record)
+  SHARED MODE Mode
 
-'
-'
-' #############################
-' #####  ListViewCode ()  #####
-' #############################
-'
-
-FUNCTION  ListViewCode (grid, message, v0, v1, v2, v3, kid, r1)
-  SHARED XLONG RecordList[]
-  SHARED StringData$[]
-  STATIC XLONG Record[]
-  
-	$ListView  =   0  ' kid   0 grid type = ListView
-  $Fieldlist =   1
-	$Listview  =   2 ' kid   1 grid type = XuiList
-	$UpperKid  =   2  ' kid maximum
-'
-	'XuiReportMessage (grid, message, v0, v1, v2, v3, kid, r1)
-	IF (message == #Callback) THEN message = r1
-'
-	SELECT CASE message
-    CASE #Notify      : GOSUB Update
-		CASE #Selection		: GOSUB Selection   	' most common callback message
-		CASE #CloseWindow	: XuiSendMessage (grid, #HideWindow, 0, 0, 0, 0, 0, 0)
-	END SELECT
-	RETURN
-  '
-  '
-  ' *****  Selection  *****
-  '
-  SUB Selection
-    SELECT CASE kid
-      CASE $ListView  :
-      CASE $Fieldlist : GOSUB HandleField
-      CASE $Listview  : GOSUB HandleListSelection
-    END SELECT
-  END SUB
-
-  SUB HandleField
-    IFZ(RecordList[]) THEN EXIT SUB
-    ctr = 0
-    XuiSendMessage(#ListView, #GetTextString, 0, 0,0,0, $Fieldlist, @field$)
-    IFZ(GetFieldByName(field$, @index)) THEN RETURN
-    'Get all field values for the requested field
-    REDIM #Buff$[]
-    REDIM #Buff$[UBOUND(RecordList[])]
-    REDIM Record[UBOUND(RecordList[])]
-    IF(#ShowOnlyMarked) THEN
-      record = GetFirstRecord(0, $$GET_MARKED)
-    ELSE
-      record = GetFirstRecord(0, $$GET_ORDINAL)
-    END IF
-    first = RecordList[record].first
-    #Buff$[ctr] = StringData$[first + index]
-    Record[ctr] = record
-    DO
-      INC ctr
-      IF(#ShowOnlyMarked) THEN
-        record = GetNextRecord(GetOrderIndex(record), $$GET_MARKED)
-      ELSE
-        record = GetNextRecord(GetOrderIndex(record), $$GET_ORDINAL)
-      END IF
-      IF(record == -1) THEN EXIT DO
-      first = RecordList[record].first
-      #Buff$[ctr] = StringData$[first + index]
-      Record[ctr] = record
-    LOOP
-   
-    XuiSendMessage(#ListView, #SetTextArray, 0,0,0,0, $Listview, @#Buff$[])
-    XuiSendMessage(#ListView, #SetWindowTitle, 0,0,0,0,0, @field$)
-    XuiSendMessage(#ListView, #Redraw, 0,0,0,0,$Listview, 0)
-  END SUB
-  
-  SUB HandleListSelection
-    record = Record[v0]
+  IF(record != -1) THEN
+    Mode.viewMode = $$VIEW_MARKED
     DisplayRecord(record, $$TRUE)
-  END SUB
-  
-  SUB Update
-    IF(v0) THEN
-      GetFieldNames(@#Buff$[])
-      XuiSendMessage(#ListView, #SetTextArray, 0,0,0,0, $Fieldlist, @#Buff$[])
-      XuiSendMessage(#ListView, #Redraw, 0,0,0,0,$Fieldlist, 0)
-    END IF
-    GOSUB HandleField
-  END SUB
+  ELSE
+    ShowMessage("No Marked Records!")
+    Mode.viewMode = $$VIEW_ALL
+    #ShowOnlyMarked = $$FALSE
+  END IF
 END FUNCTION
 
 FUNCTION Help ()
@@ -13951,7 +13929,7 @@ FUNCTION ExportHTML (file$, mode)
   SHARED RecordList[]
   SHARED FIELD FieldList[]
   SHARED StringData$[]
-  
+
   count = 0
   str$ = "<html><head><body>"
   str$ = str$ + "<table width='100%' style='background-color:white;border-width:1px;border-color: gray' border='1' cellpadding='2' cellspacing='0'>"
@@ -13961,7 +13939,7 @@ FUNCTION ExportHTML (file$, mode)
     str$ = str$ + "<th>" + names$[i] + "</th>"
   NEXT i
   str$ = str$ + "</tr>"
-  
+
   FOR i = 0 TO UBOUND(RecordOrder[])
     record = RecordOrder[i]
     first = RecordList[record].first
@@ -13976,17 +13954,17 @@ FUNCTION ExportHTML (file$, mode)
     END SELECT
     INC count
   NEXT i
-  
+
   str$ = str$ + "</body></head></html>\n"
   XstSaveString(file$, @str$)
   RETURN count
-  
+
   SUB ExportAsHTML
     x = 0
     data$ = ""
     str$ = str$ + "<tr>"
     FOR z = first TO last
-      IF(StringData$[z] == "") THEN 
+      IF(StringData$[z] == "") THEN
         data$ = "&nbsp"
       ELSE
         data$ = StringData$[z]
@@ -14000,18 +13978,18 @@ FUNCTION ExportHTML (file$, mode)
     NEXT z
     str$ = str$ + "</tr>"
   END SUB
-  
+
 END FUNCTION
 
 FUNCTION RunExternalTool(tool$)
   SHARED FIELD LabelList[]
-  
+
   SELECT CASE TRUE
     CASE tool$ == #BitmapEditor$ : GOSUB RunBitmapEditor
     CASE tool$ == #HTMLViewer$   : GOSUB RunHTMLViewer
     CASE ELSE                    : ShowMessage("External tool not\ndefined in config file!")
   END SELECT
-  
+
   SUB RunBitmapEditor
     file$ = ""
     IF(GetLabelByGrid(#SelectedGrid, @index)) THEN
@@ -14021,13 +13999,13 @@ FUNCTION RunExternalTool(tool$)
     END IF
     SHELL(":\"" + #BitmapEditor$ + "\" " + file$)
   END SUB
-  
+
   SUB RunHTMLViewer
-    file$ = "C:/TEMP/xfile.htm" 
+    file$ = "C:/TEMP/xfile.htm"
     count = ExportHTML(file$, $$EXPORT_ALL)
     cmd$ = ":\"" + #HTMLViewer$ + "\" " + file$
     SHELL(cmd$)
   END SUB
-END FUNCTION
 
+END FUNCTION
 END PROGRAM

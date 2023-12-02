@@ -1,1 +1,0 @@
-EXTERNAL FUNCTION  Tokenize (in$, @out$[], @delimiter$)

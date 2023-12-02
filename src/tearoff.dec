@@ -1,6 +1,0 @@
-EXTERNAL FUNCTION  CreateTearOff (parent, kid, v0)
-EXTERNAL FUNCTION  GetTearoffs(@grids[])
-EXTERNAL FUNCTION  CloseTearoff(grid)
-EXTERNAL FUNCTION  CloseAllTearoffs()
-EXTERNAL FUNCTION  HideTearoff(grid)
-EXTERNAL FUNCTION  ShowTearoff(grid)
