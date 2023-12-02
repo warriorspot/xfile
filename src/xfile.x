@@ -2709,6 +2709,7 @@ FUNCTION  GeoFileCode (grid, message, v0, v1, v2, v3, kid, r1)
    END SUB
 
   SUB OpenProject
+		IFZ AskYesNo("This will close your current project.  Proceed?") THEN EXIT SUB
     GetFilename(@file$, @attr)
     IF(file$) THEN
       OpenProject(file$)
@@ -2716,6 +2717,7 @@ FUNCTION  GeoFileCode (grid, message, v0, v1, v2, v3, kid, r1)
   END SUB
 
   SUB CreateProject
+		 IFZ AskYesNo("This will close your current project.  Proceed?") THEN EXIT SUB
      CreateProject()
   END SUB
 
@@ -6058,9 +6060,9 @@ END FUNCTION
 ' ##############################
 '
 FUNCTION  CreateProject ()
-   IF(#CurrentProject$) THEN
+  IF(#CurrentProject$) THEN
       IFZ(CloseProject($$TRUE, $$FALSE)) THEN RETURN
-   END IF
+  END IF
   XuiDialog("Enter Project Name", "", @kid, @message$)
   IF(kid == 2 || kid == 3) THEN
     #CurrentProject$ = #ProjectDirectory$ + message$
