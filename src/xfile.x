@@ -855,7 +855,7 @@ FUNCTION  InitProgram (first)
     #NoScrollbars = $$TRUE
     ReadConfigFile(#ConfigFile$)
 
-    #MouseMode = $$NONE
+    #MouseMode = $$SELECTION
     #RulerMode = $$RULER_MODE_INCHES
     #Timer = 0
     DIM #Buff[]
@@ -2203,6 +2203,7 @@ FUNCTION  GeoFile (grid, message, v0, v1, v2, v3, r0, (r1, r1$, r1[], r1$[]))
      'XuiSendMessage ( g, #SetBorder, $$BorderLower2, $$BorderRaise2, $$BorderLower2, 0, 0, 0)
      XuiSendMessage ( g, #SetImage, 0, 0, 0, 0, 0, "." + $$PathSlash$ + "images" + $$PathSlash$ + "design.bmp")
      XuiSendMessage ( g, #SetHintString, 0,0,0,0,0, @"Switch to Design mode")
+		 XuiSendMessage ( g, #SetValue, 1,0,0,0,0,0)
 
      XuiRadioButton (@g, #Create, 104, 516, 76, 28, r0, grid)
      XuiSendMessage ( g, #SetCallback, grid, &GeoFile(), -1, -1, $xrbDataEntry, grid)
@@ -2246,6 +2247,7 @@ FUNCTION  GeoFile (grid, message, v0, v1, v2, v3, r0, (r1, r1$, r1[], r1$[]))
      XuiSendMessage ( g, #SetImage, 0, 0, 0, 0, 0, "." + $$PathSlash$ + "images" + $$PathSlash$ + "mall.bmp")
      XuiSendMessage ( g, #SetImageCoords, 0, 0, 46, 40, 0, 0)
      XuiSendMessage ( g, #SetHintString, 0,0,0,0,0, @"Enable selection mode")
+     XuiSendMessage ( g, #SetValue, 1,0,0,0,0,0)
 
   'Tools
      XuiPushButton  (@g, #Create, 0, 24, 20, 20, r0, grid)
