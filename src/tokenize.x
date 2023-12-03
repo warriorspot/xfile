@@ -39,13 +39,11 @@ FUNCTION  Tokenize (@in$, @out$[], @delim$)
 	RETURN count
 
 	SUB Add
-		IF(st$ != "") THEN
-			size = UBOUND(out$[])
-			REDIM out$[size + 1]
-			out$[UBOUND(out$[])] = st$
-			INC count
-			st$ = ""
-		END IF
+		size = UBOUND(out$[])
+		REDIM out$[size + 1]
+		out$[UBOUND(out$[])] = st$
+		INC count
+		st$ = ""
 	END SUB
 END FUNCTION
 END PROGRAM
